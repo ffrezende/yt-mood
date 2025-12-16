@@ -237,25 +237,62 @@ export class MoodService {
   }
 
   private buildMoodAnalysisPrompt(transcript: string, voiceTone: string): string {
+    const context = this.buildContextSection();
+    const inputData = this.buildInputDataSection(transcript, voiceTone);
+    const task = this.buildTaskSection();
+    const analysisFocus = this.buildAnalysisFocusSection();
+    const outputFormat = this.buildOutputFormatSection();
+    const constraints = this.buildConstraintsSection();
+
+    return `${context}
+
+${inputData}
+
+${task}
+
+${analysisFocus}
+
+${outputFormat}
+
+${constraints}`;
+  }
+
+  private buildContextSection(): string {
     return `You are a professional psychologist conducting emotional state analysis for research purposes. You are analyzing still images extracted from video content.
 
-CONTEXT: This is a legitimate research application analyzing facial expressions and body language to understand emotional states. The images are from publicly available video content.
+CONTEXT: This is a legitimate research application analyzing facial expressions and body language to understand emotional states. The images are from publicly available video content.`;
+  }
 
-INPUT DATA:
+  private buildInputDataSection(transcript: string, voiceTone: string): string {
+    const transcriptLine = transcript
+      ? `- TRANSCRIPT: "${transcript}"`
+      : '- TRANSCRIPT: Not available (visual analysis only)';
+    const voiceToneLine = voiceTone
+      ? `- VOICE TONE: ${voiceTone}`
+      : '- VOICE TONE: Not available (visual analysis only)';
+
+    return `INPUT DATA:
 - Images: Video frames showing facial expressions and body language
-${transcript ? `- TRANSCRIPT: "${transcript}"` : '- TRANSCRIPT: Not available (visual analysis only)'}
-${voiceTone ? `- VOICE TONE: ${voiceTone}` : '- VOICE TONE: Not available (visual analysis only)'}
+${transcriptLine}
+${voiceToneLine}`;
+  }
 
-TASK: Analyze the visual cues in the provided images and determine the emotional mood using standard psychological assessment methods.
+  private buildTaskSection(): string {
+    return `TASK: Analyze the visual cues in the provided images and determine the emotional mood using standard psychological assessment methods.`;
+  }
 
-ANALYSIS FOCUS:
+  private buildAnalysisFocusSection(): string {
+    return `ANALYSIS FOCUS:
 1. Facial expressions: Observe smiles, frowns, raised eyebrows, eye contact patterns, micro-expressions
 2. Body language: Assess posture (open/closed positions, tension levels), gestures, hand positions, body orientation
-3. Overall demeanor: Evaluate energy level and general emotional presentation
+3. Overall demeanor: Evaluate energy level and general emotional presentation`;
+  }
 
-OUTPUT FORMAT: Return valid JSON only with this exact structure:
+  private buildOutputFormatSection(): string {
+    const validMoodsList = AppConstants.VALID_MOODS.join(' | ');
+    return `OUTPUT FORMAT: Return valid JSON only with this exact structure:
 {
-  "primary_mood": "happy | sad | angry | anxious | excited | calm | neutral",
+  "primary_mood": "${validMoodsList}",
   "secondary_moods": ["mood1", "mood2"],
   "intensity": 0.0,
   "confidence": 0.0,
@@ -263,12 +300,15 @@ OUTPUT FORMAT: Return valid JSON only with this exact structure:
   "body_language": "professional description of body language and posture observed",
   "voice_tone": "N/A - visual analysis only",
   "notes": "additional professional observations"
-}
+}`;
+  }
 
-CONSTRAINTS:
-- primary_mood must be exactly one of: happy, sad, angry, anxious, excited, calm, neutral
-- intensity: decimal number between 0.0 and 1.0 (represents emotion strength)
-- confidence: decimal number between 0.0 and 1.0 (represents analysis certainty)
+  private buildConstraintsSection(): string {
+    const validMoodsList = AppConstants.VALID_MOODS.join(', ');
+    return `CONSTRAINTS:
+- primary_mood must be exactly one of: ${validMoodsList}
+- intensity: decimal number between ${AppConstants.MOOD_INTENSITY_MIN} and ${AppConstants.MOOD_INTENSITY_MAX} (represents emotion strength)
+- confidence: decimal number between ${AppConstants.MOOD_CONFIDENCE_MIN} and ${AppConstants.MOOD_CONFIDENCE_MAX} (represents analysis certainty)
 - secondary_moods: array of strings (can be empty array [])
 - All text descriptions should be professional, objective, and concise`;
   }
