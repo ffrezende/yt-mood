@@ -4,10 +4,6 @@ interface SummaryCardsProps {
   result: AnalysisResult;
 }
 
-/**
- * Summary cards component
- * Displays key analysis metrics in card format
- */
 export function SummaryCards({ result }: SummaryCardsProps) {
   const cards = [
     {

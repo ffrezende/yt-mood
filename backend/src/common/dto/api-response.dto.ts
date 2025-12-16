@@ -1,8 +1,3 @@
-/**
- * Standard API response DTOs
- * Ensures consistent response format across all endpoints
- */
-
 export class ApiResponseDto<T> {
   success: boolean;
   data?: T;
@@ -20,8 +15,12 @@ export class ApiResponseDto<T> {
     return new ApiResponseDto(true, data, undefined, message);
   }
 
-  static error(error: ApiErrorDto, message?: string): ApiResponseDto<never> {
-    return new ApiResponseDto(false, undefined, error, message);
+  static successWithoutData(message?: string): ApiResponseDto<void> {
+    return new ApiResponseDto<void>(true, undefined, undefined, message);
+  }
+
+  static error(error: ApiErrorDto, message?: string): ApiResponseDto<void> {
+    return new ApiResponseDto<void>(false, undefined, error, message);
   }
 }
 

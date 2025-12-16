@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe, Logger } from '@nestjs/common';
+import { ValidationPipe, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { TempFileUtil } from './common/utils/temp-file.util';
 import { FfmpegUtil } from './common/utils/ffmpeg.util';
@@ -16,12 +16,10 @@ async function bootstrap() {
   try {
     logger.log('🚀 Starting NestJS application...');
     
-    // Initialize temp directory
     logger.log('📁 Initializing temp directory...');
     await TempFileUtil.initialize();
     logger.log('✅ Temp directory initialized');
 
-    // Configure FFmpeg to use bundled binary
     logger.log('🎬 Configuring FFmpeg...');
     FfmpegUtil.configure();
 
@@ -32,7 +30,6 @@ async function bootstrap() {
     
     const configService = app.get(ConfigService);
     
-    // Test Redis connection
     logger.log('🔌 Testing Redis connection...');
     try {
       const redisHost = configService.get<string>('REDIS_HOST', AppConstants.REDIS_DEFAULT_HOST);
@@ -53,7 +50,6 @@ async function bootstrap() {
       logger.error('❌ Error testing Redis connection:', error);
     }
     
-    // Enable CORS for Next.js frontend
     logger.log('🌐 Configuring CORS...');
     const frontendUrl = configService.get<string>('FRONTEND_URL', AppConstants.DEFAULT_FRONTEND_URL);
     app.enableCors({
@@ -62,15 +58,12 @@ async function bootstrap() {
     });
     logger.log(`✅ CORS enabled for: ${frontendUrl}`);
 
-    // Enable global exception filter
     logger.log('🛡️  Configuring global exception filter...');
     app.useGlobalFilters(new HttpExceptionFilter());
 
-    // Enable global interceptors
     logger.log('🔄 Configuring global interceptors...');
     app.useGlobalInterceptors(new LoggingInterceptor(), new TransformInterceptor());
 
-    // Enable validation pipes
     logger.log('✅ Configuring validation pipes...');
     app.useGlobalPipes(
       new ValidationPipe({

@@ -1,6 +1,3 @@
-/**
- * Header component for the application
- */
 export function Header() {
   return (
     <div className="text-center mb-8">

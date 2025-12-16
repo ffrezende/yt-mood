@@ -7,10 +7,6 @@ interface VideoInputFormProps {
   loading: boolean;
 }
 
-/**
- * Video input form component
- * Handles YouTube URL input and analysis trigger
- */
 export function VideoInputForm({
   youtubeUrl,
   onUrlChange,

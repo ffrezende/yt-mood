@@ -5,10 +5,6 @@ interface DetailedTimelineProps {
   timeline: MoodTimelineEntry[];
 }
 
-/**
- * Detailed timeline component
- * Displays all timeline entries with frame images
- */
 export function DetailedTimeline({ timeline }: DetailedTimelineProps) {
   return (
     <div className="mt-8">

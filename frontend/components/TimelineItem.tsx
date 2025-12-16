@@ -5,14 +5,9 @@ interface TimelineItemProps {
   index: number;
 }
 
-/**
- * Timeline item component
- * Displays a single timeline entry with frame image and mood information
- */
 export function TimelineItem({ entry, index }: TimelineItemProps) {
   return (
     <div className="flex flex-col sm:flex-row items-start gap-4 p-4 bg-gray-50 rounded-lg border-l-4 border-primary-500 transition-all hover:shadow-md hover:-translate-y-0.5">
-      {/* Frame Image */}
       {entry.frameImage && (
         <div className="flex-shrink-0 w-full sm:w-48 h-auto sm:h-28 rounded-lg overflow-hidden bg-gray-200 flex items-center justify-center">
           <img

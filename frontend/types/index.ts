@@ -1,7 +1,3 @@
-/**
- * Shared TypeScript types and interfaces
- */
-
 export interface MoodTimelineEntry {
   start: number;
   end: number;

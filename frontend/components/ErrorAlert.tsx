@@ -5,10 +5,6 @@ interface ErrorAlertProps {
   onDismiss?: () => void;
 }
 
-/**
- * Error alert component
- * Displays error messages with optional dismiss functionality
- */
 export function ErrorAlert({ message, onDismiss }: ErrorAlertProps) {
   return (
     <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-8 flex items-start justify-between gap-4">

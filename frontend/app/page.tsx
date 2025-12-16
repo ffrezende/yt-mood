@@ -6,12 +6,8 @@ import { VideoInputForm } from '@/components/VideoInputForm';
 import { ErrorAlert } from '@/components/ErrorAlert';
 import { AnalysisResults } from '@/components/AnalysisResults';
 
-/**
- * Home page component
- * Main entry point for the YouTube Mood Analyzer application
- */
 export default function Home() {
-  const { youtubeUrl, setYoutubeUrl, loading, result, error, analyzeVideo, reset } =
+  const { youtubeUrl, setYoutubeUrl, loading, result, error, analyzeVideo, reset, clearError } =
     useVideoAnalysis();
 
   return (
@@ -26,7 +22,7 @@ export default function Home() {
           loading={loading}
         />
 
-        {error && <ErrorAlert message={error} onDismiss={reset} />}
+        {error && <ErrorAlert message={error} onDismiss={clearError} />}
 
         {result && <AnalysisResults result={result} />}
       </div>
