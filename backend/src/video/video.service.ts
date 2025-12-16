@@ -1,6 +1,4 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-// Using @distube/ytdl-core via npm alias (ytdl-core@npm:@distube/ytdl-core)
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const ytdl = require('ytdl-core');
 import ffmpeg from 'fluent-ffmpeg';
 import * as path from 'path';
@@ -22,23 +20,16 @@ export class VideoService implements OnModuleInit {
   private readonly logger = new Logger(VideoService.name);
 
   onModuleInit() {
-    // Configure fluent-ffmpeg to use the bundled FFmpeg binary
     FfmpegUtil.configure();
   }
 
-  /**
-   * Download YouTube video and split into 15-second chunks
-   * Returns array of chunk metadata with paths to video and audio files
-   */
   async downloadAndChunk(youtubeUrl: string): Promise<VideoChunk[]> {
-    // Validate URL
     if (!YoutubeUtil.isValidUrl(youtubeUrl)) {
       throw new Error('Invalid YouTube URL');
     }
 
     let videoInfo;
     try {
-      // Get video info
       this.logger.log(`Fetching video information for: ${youtubeUrl}`);
       videoInfo = await YoutubeUtil.getVideoInfo(youtubeUrl);
     } catch (error: any) {
@@ -58,16 +49,13 @@ export class VideoService implements OnModuleInit {
       `Processing video: ${videoInfo.videoDetails.title} (${duration}s, ${chunkCount} chunks)`,
     );
 
-    // Create temp directory for this video
     const tempDir = TempFileUtil.createTempDir();
     await fs.ensureDir(tempDir);
 
-    // Download video stream to temp file
     const videoPath = path.join(tempDir, 'video.mp4');
     this.logger.log(`Downloading video to: ${videoPath}`);
     await this.downloadVideo(youtubeUrl, videoPath);
     
-    // Verify downloaded video exists and has content
     if (!(await fs.pathExists(videoPath))) {
       throw new Error('Video download failed: file not created');
     }
@@ -77,7 +65,6 @@ export class VideoService implements OnModuleInit {
     }
     this.logger.log(`Video downloaded successfully: ${videoStats.size} bytes`);
 
-    // Split into chunks
     const chunks: VideoChunk[] = [];
     this.logger.log(`Starting chunk extraction for ${chunkCount} chunks...`);
     
@@ -91,11 +78,9 @@ export class VideoService implements OnModuleInit {
       this.logger.debug(`Extracting chunk ${i}: ${startTime}s - ${endTime}s`);
 
       try {
-        // Extract video chunk
         this.logger.debug(`Extracting video chunk ${i}...`);
         await this.extractVideoChunk(videoPath, chunkVideoPath, startTime, endTime);
         
-        // Verify video chunk was created
         if (!(await fs.pathExists(chunkVideoPath))) {
           throw new Error(`Video chunk ${i} extraction failed: file not created`);
         }
@@ -104,11 +89,9 @@ export class VideoService implements OnModuleInit {
           throw new Error(`Video chunk ${i} extraction failed: file is empty`);
         }
 
-        // Extract audio chunk (16kHz WAV)
         this.logger.debug(`Extracting audio chunk ${i}...`);
         await this.extractAudioChunk(videoPath, chunkAudioPath, startTime, endTime);
         
-        // Verify audio chunk was created and has content
         if (!(await fs.pathExists(chunkAudioPath))) {
           throw new Error(`Audio chunk ${i} extraction failed: file not created`);
         }
@@ -129,15 +112,11 @@ export class VideoService implements OnModuleInit {
         });
       } catch (error: any) {
         this.logger.error(`Failed to extract chunk ${i} (${startTime}s-${endTime}s): ${error.message}`);
-        // Clean up partial files
         await fs.unlink(chunkVideoPath).catch(() => {});
         await fs.unlink(chunkAudioPath).catch(() => {});
-        // Don't throw - continue processing other chunks
-        // We'll verify all chunks at the end
       }
     }
 
-    // Verify all chunks were created successfully
     if (chunks.length === 0) {
       await TempFileUtil.cleanup(videoPath).catch(() => {});
       throw new Error('Failed to extract any chunks from the video. Check FFmpeg installation and video format.');
@@ -149,7 +128,6 @@ export class VideoService implements OnModuleInit {
       );
     }
 
-    // Verify all chunk files exist before returning
     for (const chunk of chunks) {
       const videoExists = await fs.pathExists(chunk.videoPath);
       const audioExists = await fs.pathExists(chunk.audioPath);
@@ -158,7 +136,6 @@ export class VideoService implements OnModuleInit {
         this.logger.error(
           `Chunk ${chunk.index} verification failed after extraction: video=${videoExists}, audio=${audioExists}`,
         );
-        // Remove invalid chunk from array
         const index = chunks.indexOf(chunk);
         if (index > -1) {
           chunks.splice(index, 1);
@@ -171,7 +148,6 @@ export class VideoService implements OnModuleInit {
       throw new Error('No valid chunks were extracted. All chunk extractions failed.');
     }
 
-    // Clean up original downloaded video only after verification
     this.logger.debug('Cleaning up original video file...');
     await TempFileUtil.cleanup(videoPath);
 
@@ -179,17 +155,7 @@ export class VideoService implements OnModuleInit {
     return chunks;
   }
 
-  /**
-   * Download video stream from YouTube
-   * Optimized for mood analysis:
-   * - Uses 720p quality (quality '22') which is sufficient for facial expression analysis
-   * - Balances download speed with analysis accuracy
-   * - Higher quality doesn't significantly improve mood detection but increases processing time
-   * - Falls back to 'lowestvideo' if 720p is not available
-   */
   private async downloadVideo(url: string, outputPath: string): Promise<void> {
-    // Try 720p first (optimal for facial analysis)
-    // Fallback to lowest if not available (some videos may not have 720p)
     const qualityOptions = ['22', 'lowestvideo', 'lowest'];
     let lastError: Error | null = null;
     
@@ -203,7 +169,6 @@ export class VideoService implements OnModuleInit {
         lastError = error;
         this.logger.warn(`Failed to download at quality ${quality}: ${error.message}`);
         
-        // If this is the last option, throw the error
         if (quality === qualityOptions[qualityOptions.length - 1]) {
           throw new Error(
             `Failed to download video at any quality. Last error: ${error.message}\n` +
@@ -216,13 +181,9 @@ export class VideoService implements OnModuleInit {
       }
     }
     
-    // Should never reach here, but TypeScript needs it
     throw lastError || new Error('Unknown download error');
   }
 
-  /**
-   * Attempt to download video at a specific quality
-   */
   private async attemptDownload(
     url: string,
     outputPath: string,
@@ -246,7 +207,6 @@ export class VideoService implements OnModuleInit {
 
       videoStream.on('error', (error: any) => {
         this.logger.error(`Video stream error (quality ${quality}):`, error.message);
-        // Clean up partial file
         fs.unlink(outputPath).catch(() => {});
         reject(new Error(`Video download failed: ${error.message}`));
       });
@@ -262,10 +222,6 @@ export class VideoService implements OnModuleInit {
     });
   }
 
-  /**
-   * Extract a video chunk using ffmpeg
-   * Command: ffmpeg -i input.mp4 -ss START -t DURATION -c copy output.mp4
-   */
   private async extractVideoChunk(
     inputPath: string,
     outputPath: string,
@@ -291,10 +247,6 @@ export class VideoService implements OnModuleInit {
     });
   }
 
-  /**
-   * Extract audio chunk as 16kHz WAV
-   * Command: ffmpeg -i input.mp4 -ss START -t DURATION -ar 16000 -ac 1 output.wav
-   */
   private async extractAudioChunk(
     inputPath: string,
     outputPath: string,
@@ -302,7 +254,6 @@ export class VideoService implements OnModuleInit {
     endTime: number,
   ): Promise<void> {
     return new Promise(async (resolve, reject) => {
-      // Verify input file exists
       if (!(await fs.pathExists(inputPath))) {
         reject(new Error(`Input video file does not exist: ${inputPath}`));
         return;
@@ -313,13 +264,12 @@ export class VideoService implements OnModuleInit {
       ffmpeg(inputPath)
         .setStartTime(startTime)
         .setDuration(duration)
-        .audioFrequency(16000) // 16kHz
-        .audioChannels(1) // Mono
-        .audioCodec('pcm_s16le') // WAV format
+        .audioFrequency(16000)
+        .audioChannels(1)
+        .audioCodec('pcm_s16le')
         .format('wav')
         .output(outputPath)
         .on('end', async () => {
-          // Verify output file was created and has content
           try {
             if (!(await fs.pathExists(outputPath))) {
               reject(new Error(`Audio extraction completed but file not found: ${outputPath}`));
@@ -338,7 +288,6 @@ export class VideoService implements OnModuleInit {
         })
         .on('error', (error: any) => {
           this.logger.error(`FFmpeg audio extraction error: ${error.message}`);
-          // Clean up partial file if it exists
           fs.unlink(outputPath).catch(() => {});
           reject(new Error(`Audio extraction failed: ${error.message}`));
         })
@@ -346,15 +295,11 @@ export class VideoService implements OnModuleInit {
     });
   }
 
-  /**
-   * Clean up all chunks for a video
-   */
   async cleanupChunks(chunks: VideoChunk[]): Promise<void> {
     for (const chunk of chunks) {
       await TempFileUtil.cleanup(chunk.videoPath).catch(() => {});
       await TempFileUtil.cleanup(chunk.audioPath).catch(() => {});
     }
-    // Clean up parent directory
     if (chunks.length > 0) {
       const parentDir = path.dirname(chunks[0].videoPath);
       await TempFileUtil.cleanup(parentDir).catch(() => {});

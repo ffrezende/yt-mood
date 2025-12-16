@@ -9,10 +9,6 @@ import {
 import { Request, Response } from 'express';
 import { AppException } from '../exceptions/app.exceptions';
 
-/**
- * Global exception filter for consistent error responses
- * Formats all exceptions into a standard API response format
- */
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(HttpExceptionFilter.name);
@@ -65,7 +61,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
       },
     };
 
-    // Log error for debugging (but don't expose sensitive info in production)
     if (status >= 500) {
       this.logger.error(
         `HTTP ${status} Error: ${message}`,

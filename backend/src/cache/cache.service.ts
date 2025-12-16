@@ -3,16 +3,12 @@ import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
 import { AggregatedResult } from '../aggregation/aggregation.service';
 
-/**
- * Cache service for storing video analysis results in Redis
- * Uses video ID as the cache key to avoid re-downloading and re-processing
- */
 @Injectable()
 export class CacheService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(CacheService.name);
   private redis: Redis | null = null;
   private readonly cachePrefix = 'video:analysis:';
-  private readonly defaultTtl = 24 * 60 * 60; // 24 hours in seconds
+  private readonly defaultTtl = 24 * 60 * 60;
 
   constructor(private configService: ConfigService) {}
 
@@ -43,7 +39,6 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
         this.logger.error('Redis cache error:', error.message);
       });
 
-      // Test connection
       await this.redis.ping();
       this.logger.log('Redis cache service initialized');
     } catch (error: any) {
@@ -60,18 +55,10 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  /**
-   * Get cache key for a video ID
-   */
   private getCacheKey(videoId: string): string {
     return `${this.cachePrefix}${videoId}`;
   }
 
-  /**
-   * Get cached analysis result for a video
-   * @param videoId YouTube video ID
-   * @returns Cached result or null if not found
-   */
   async getCachedResult(videoId: string): Promise<AggregatedResult | null> {
     if (!this.redis) {
       return null;
@@ -91,16 +78,10 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
       return null;
     } catch (error: any) {
       this.logger.error(`Error reading from cache for video ${videoId}: ${error.message}`);
-      return null; // Return null on error to allow processing to continue
+      return null;
     }
   }
 
-  /**
-   * Store analysis result in cache
-   * @param videoId YouTube video ID
-   * @param result Analysis result to cache
-   * @param ttl Time to live in seconds (default: 24 hours)
-   */
   async setCachedResult(
     videoId: string,
     result: AggregatedResult,
@@ -118,14 +99,9 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
       this.logger.log(`Cached result for video: ${videoId} (TTL: ${ttl}s)`);
     } catch (error: any) {
       this.logger.error(`Error writing to cache for video ${videoId}: ${error.message}`);
-      // Don't throw - caching failure shouldn't break the analysis
     }
   }
 
-  /**
-   * Invalidate cache for a video
-   * @param videoId YouTube video ID
-   */
   async invalidateCache(videoId: string): Promise<void> {
     if (!this.redis) {
       return;
@@ -140,16 +116,10 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  /**
-   * Check if cache is available
-   */
   isCacheAvailable(): boolean {
     return this.redis !== null && this.redis.status === 'ready';
   }
 
-  /**
-   * Get cache statistics
-   */
   async getCacheStats(): Promise<{ available: boolean; keys: number }> {
     if (!this.redis || this.redis.status !== 'ready') {
       return { available: false, keys: 0 };

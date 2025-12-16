@@ -1,8 +1,5 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 
-/**
- * Base application exception
- */
 export class AppException extends HttpException {
   constructor(
     message: string,
@@ -13,9 +10,6 @@ export class AppException extends HttpException {
   }
 }
 
-/**
- * Video processing related exceptions
- */
 export class VideoProcessingException extends AppException {
   constructor(message: string, code?: string) {
     super(message, HttpStatus.INTERNAL_SERVER_ERROR, code || 'VIDEO_PROCESSING_ERROR');
@@ -40,9 +34,6 @@ export class FrameExtractionException extends VideoProcessingException {
   }
 }
 
-/**
- * YouTube related exceptions
- */
 export class YouTubeException extends AppException {
   constructor(message: string, code?: string) {
     super(message, HttpStatus.BAD_REQUEST, code || 'YOUTUBE_ERROR');
@@ -67,9 +58,6 @@ export class YouTubeAgeRestrictedException extends YouTubeException {
   }
 }
 
-/**
- * OpenAI API related exceptions
- */
 export class OpenAIException extends AppException {
   constructor(message: string, code?: string) {
     super(message, HttpStatus.INTERNAL_SERVER_ERROR, code || 'OPENAI_ERROR');
@@ -100,18 +88,12 @@ export class OpenAIContentModerationException extends OpenAIException {
   }
 }
 
-/**
- * Cache related exceptions
- */
 export class CacheException extends AppException {
   constructor(message: string, code?: string) {
     super(message, HttpStatus.INTERNAL_SERVER_ERROR, code || 'CACHE_ERROR');
   }
 }
 
-/**
- * Validation exceptions
- */
 export class ValidationException extends AppException {
   constructor(message: string, code?: string) {
     super(message, HttpStatus.BAD_REQUEST, code || 'VALIDATION_ERROR');

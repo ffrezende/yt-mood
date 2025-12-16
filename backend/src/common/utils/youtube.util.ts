@@ -1,23 +1,11 @@
-// Using @distube/ytdl-core via npm alias (ytdl-core@npm:@distube/ytdl-core)
-// This is a maintained fork that fixes the "Could not extract functions" error
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const ytdl = require('ytdl-core');
-type videoInfo = any; // Type will be inferred from ytdl-core
+type videoInfo = any;
 
-/**
- * Utility for YouTube URL validation and video info extraction
- */
 export class YoutubeUtil {
-  /**
-   * Validate YouTube URL
-   */
   static isValidUrl(url: string): boolean {
     return ytdl.validateURL(url);
   }
 
-  /**
-   * Extract video ID from URL
-   */
   static getVideoId(url: string): string | null {
     try {
       return ytdl.getVideoID(url);
@@ -26,22 +14,16 @@ export class YoutubeUtil {
     }
   }
 
-  /**
-   * Get video info (duration, title, etc.)
-   * Retries up to 3 times if extraction fails
-   */
   static async getVideoInfo(url: string, retries: number = 3): Promise<videoInfo> {
     if (!this.isValidUrl(url)) {
       throw new Error('Invalid YouTube URL');
     }
     
-    // Configure ytdl-core to use temp directory for player scripts
     const tempDir = process.env.TEMP_DIR || './temp';
     const path = require('path');
     const fs = require('fs-extra');
     await fs.ensureDir(tempDir);
     
-    // Set cache directory for ytdl-core player scripts
     const cacheDir = path.join(tempDir, 'ytdl-cache');
     await fs.ensureDir(cacheDir);
     
@@ -49,25 +31,18 @@ export class YoutubeUtil {
     
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
-        // Try to get video info (now using @distube/ytdl-core via npm alias)
-        // Pass options to use cache directory for player scripts
         const info = await ytdl.getInfo(url, {
-          requestOptions: {
-            // This helps ytdl-core use the cache directory
-          }
+          requestOptions: {}
         });
         return info;
       } catch (error: any) {
         lastError = error;
         
-        // If it's a "Could not extract functions" error, retry with exponential backoff
         if (error.message?.includes('Could not extract functions') && attempt < retries) {
-          // Wait a bit before retrying (exponential backoff)
           await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
           continue;
         }
         
-        // For other errors, provide helpful messages
         if (error.message?.includes('Sign in to confirm your age')) {
           throw new Error('This video is age-restricted and cannot be processed without authentication');
         }
@@ -78,7 +53,6 @@ export class YoutubeUtil {
           throw new Error('This video is private and cannot be accessed');
         }
         
-        // If we've exhausted retries, throw a detailed error
         if (attempt === retries) {
           if (error.message?.includes('Could not extract functions')) {
             throw new Error(
@@ -100,14 +74,9 @@ export class YoutubeUtil {
       }
     }
     
-    // Should never reach here, but TypeScript needs it
     throw lastError || new Error('Unknown error getting video info');
   }
 
-  /**
-   * Calculate number of chunks for a video
-   * Chunks are 15 seconds each
-   */
   static calculateChunkCount(durationSeconds: number): number {
     return Math.ceil(durationSeconds / 15);
   }

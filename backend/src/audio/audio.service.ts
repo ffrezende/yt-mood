@@ -5,10 +5,6 @@ import * as fs from 'fs-extra';
 export class AudioService {
   private readonly logger = new Logger(AudioService.name);
 
-  /**
-   * Read audio file and return buffer
-   * Audio is already extracted as 16kHz WAV by VideoService
-   */
   async readAudioFile(audioPath: string): Promise<Buffer> {
     try {
       const buffer = await fs.readFile(audioPath);
@@ -20,9 +16,6 @@ export class AudioService {
     }
   }
 
-  /**
-   * Get audio file size (for logging/debugging)
-   */
   async getAudioFileSize(audioPath: string): Promise<number> {
     const stats = await fs.stat(audioPath);
     return stats.size;

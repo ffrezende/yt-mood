@@ -2,10 +2,6 @@ import { PipeTransform, Injectable, ArgumentMetadata, BadRequestException } from
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 
-/**
- * Custom validation pipe for DTOs
- * Provides better error messages
- */
 @Injectable()
 export class CustomValidationPipe implements PipeTransform<any> {
   async transform(value: any, { metatype }: ArgumentMetadata) {

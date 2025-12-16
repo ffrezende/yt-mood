@@ -16,20 +16,14 @@ export class TranscriptionService {
     this.openai = new OpenAI({ apiKey });
   }
 
-  /**
-   * Transcribe audio using OpenAI Whisper
-   * Audio must be 16kHz WAV format
-   */
   async transcribe(audioPath: string): Promise<string> {
     try {
       this.logger.debug(`Transcribing audio: ${audioPath}`);
 
-      // Check if file exists before attempting transcription
       if (!(await fs.pathExists(audioPath))) {
         throw new Error(`Audio file does not exist: ${audioPath}`);
       }
 
-      // Check file size (empty files will cause errors)
       const stats = await fs.stat(audioPath);
       if (stats.size === 0) {
         throw new Error(`Audio file is empty: ${audioPath}`);
@@ -37,18 +31,16 @@ export class TranscriptionService {
 
       this.logger.debug(`Audio file exists, size: ${stats.size} bytes`);
 
-      // Call Whisper API using file stream
       const transcription = await this.openai.audio.transcriptions.create({
         file: fs.createReadStream(audioPath) as any,
         model: 'whisper-1',
-        language: 'en', // Can be made configurable
+        language: 'en',
       });
 
       const text = transcription.text.trim();
       this.logger.debug(`Transcription: ${text}`);
       return text;
     } catch (error: any) {
-      // Handle OpenAI API errors with helpful messages
       if (error?.status === 429) {
         if (error?.message?.includes('quota')) {
           throw new Error(
@@ -67,15 +59,7 @@ export class TranscriptionService {
     }
   }
 
-  /**
-   * Analyze voice tone characteristics from audio
-   * This is a placeholder - in production, you might use audio analysis libraries
-   * or additional ML models to extract pitch, speed, energy, etc.
-   */
   async analyzeVoiceTone(audioPath: string): Promise<string> {
-    // For now, return a placeholder
-    // In production, you could use librosa, essentia, or similar tools
-    // to extract: pitch, tempo, energy, spectral features
     return 'Voice tone analysis would extract pitch, speed, and energy here';
   }
 }
