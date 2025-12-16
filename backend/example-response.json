@@ -1,0 +1,42 @@
+{
+  "success": true,
+  "data": {
+    "overall_mood": "happy",
+    "mood_timeline": [
+      {
+        "start": 0,
+        "end": 15,
+        "mood": "happy",
+        "confidence": 0.85,
+        "frameImage": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+      },
+      {
+        "start": 15,
+        "end": 30,
+        "mood": "excited",
+        "confidence": 0.92,
+        "frameImage": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+      },
+      {
+        "start": 30,
+        "end": 45,
+        "mood": "calm",
+        "confidence": 0.78,
+        "frameImage": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+      },
+      {
+        "start": 45,
+        "end": 60,
+        "mood": "happy",
+        "confidence": 0.88,
+        "frameImage": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+      }
+    ],
+    "emotional_variability": 0.4
+  }
+}
+
+
+
+
+
