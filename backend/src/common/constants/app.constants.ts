@@ -1,7 +1,3 @@
-/**
- * Application-wide constants
- * Centralizes magic numbers and strings for better maintainability
- */
 export class AppConstants {
   // Video Processing
   static readonly CHUNK_DURATION_SECONDS = 15;
@@ -41,8 +37,9 @@ export class AppConstants {
   static readonly DEFAULT_FRONTEND_URL = 'http://localhost:3000';
 
   // Job Processing
+  static readonly QUEUE_NAME = 'chunk-processing';
   static readonly JOB_POLL_INTERVAL_MS = 500;
-  static readonly JOB_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+  static readonly JOB_TIMEOUT_MS = 5 * 60 * 1000;
 
   // File Paths
   static readonly TEMP_DIR = './temp';
