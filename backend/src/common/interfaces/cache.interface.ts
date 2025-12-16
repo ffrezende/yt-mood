@@ -1,7 +1,3 @@
-/**
- * Interfaces for cache domain
- */
-
 import { IAggregatedResult } from './mood-analysis.interface';
 
 export interface ICacheService {

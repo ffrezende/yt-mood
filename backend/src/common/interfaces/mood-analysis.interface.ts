@@ -1,7 +1,3 @@
-/**
- * Interfaces for mood analysis domain
- */
-
 export interface IMoodAnalysisResult {
   primary_mood: string;
   secondary_moods: string[];

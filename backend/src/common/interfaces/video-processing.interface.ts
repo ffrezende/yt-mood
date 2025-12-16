@@ -1,8 +1,3 @@
-/**
- * Interfaces for video processing domain
- * Defines contracts for services
- */
-
 export interface IVideoChunk {
   index: number;
   startTime: number;
